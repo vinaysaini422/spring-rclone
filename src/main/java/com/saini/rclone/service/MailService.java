@@ -5,6 +5,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.mail.javamail.MimeMessagePreparator;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 
 import com.saini.rclone.exceptions.SpringRedditException;
@@ -16,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @AllArgsConstructor
 @Slf4j
+@EnableAsync
 public class MailService {
 
 	private final JavaMailSender mailSender;
@@ -28,7 +30,7 @@ public class MailService {
 			messageHelper.setFrom("vk741672@gmail.com");
 			messageHelper.setTo(notificationEmail.getRecipient());
 			messageHelper.setSubject(notificationEmail.getSubject());
-			messageHelper.setText(notificationEmail.getBody());
+			messageHelper.setText(mailContentBuilder.build(notificationEmail.getBody()));
 		};
 		try {
 			mailSender.send(messagePreparator);
