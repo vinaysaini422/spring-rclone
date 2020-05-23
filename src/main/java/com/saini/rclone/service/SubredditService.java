@@ -14,19 +14,18 @@ import com.saini.rclone.model.Subreddit;
 import com.saini.rclone.repositories.SubredditRepository;
 
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 @Service
 @AllArgsConstructor
-@Slf4j
 public class SubredditService {
 
 	private final SubredditRepository subredditRepository;
+	private final SubredditMapper subredditMapper;
     
     @Transactional
     public SubredditDto save(SubredditDto subredditDto) {
         //Subreddit save = subredditRepository.save(subredditMapper.mapDtoToSubreddit(subredditDto));
-    	Subreddit save = subredditRepository.save(mapDtoToSubreddit(subredditDto));
+    	Subreddit save = subredditRepository.save(subredditMapper.mapDtoToSubreddit(subredditDto));
         subredditDto.setId(save.getId());
         return subredditDto;
     }
@@ -35,27 +34,23 @@ public class SubredditService {
     public List<SubredditDto> getAll() {
         return subredditRepository.findAll()
                 .stream()
-                .map(this::mapToDto)
+                .map(subredditMapper::mapSubredditToDto)
                 .collect(Collectors.toList());
     }
     
     public SubredditDto getSubreddit(Long id) {
     	Subreddit dto =subredditRepository.findById(id).orElseThrow(() -> new SubredditNotFoundException("Subreddit does not exist"));
-    	return mapToDto(dto);
+    	return subredditMapper.mapSubredditToDto(dto);
     	
     }
     
-    private SubredditDto mapToDto(Subreddit subreddit) {
-    	return SubredditDto.builder()
-    			.name(subreddit.getName())
-    			.id(subreddit.getId())
-    			.numberOfPosts(subreddit.getPosts().size())
-    			.build();
-    }
-    
-    private Subreddit mapDtoToSubreddit(SubredditDto subredditDto) {
-    	return Subreddit.builder().name(subredditDto.getName())
-    		.description(subredditDto.getDescription())
-    		.build();
-    }
+	/*
+	 * private SubredditDto mapToDto(Subreddit subreddit) { return
+	 * SubredditDto.builder() .name(subreddit.getName()) .id(subreddit.getId())
+	 * .numberOfPosts(subreddit.getPosts().size()) .build(); }
+	 * 
+	 * private Subreddit mapDtoToSubreddit(SubredditDto subredditDto) { return
+	 * Subreddit.builder().name(subredditDto.getName())
+	 * .description(subredditDto.getDescription()) .build(); }
+	 */
 }

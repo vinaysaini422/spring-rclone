@@ -15,12 +15,10 @@ import com.saini.rclone.dto.SubredditDto;
 import com.saini.rclone.service.SubredditService;
 
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/api/subreddit")
 @AllArgsConstructor
-@Slf4j
 public class SubredditController {
 
 	private final SubredditService subredditService;
