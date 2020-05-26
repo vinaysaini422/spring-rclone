@@ -12,8 +12,6 @@ import com.saini.rclone.model.User;
 import com.saini.rclone.repositories.CommentRepository;
 
 
-
-
 @Mapper(componentModel = "spring")
 public abstract class PostMapper {
 
@@ -30,6 +28,7 @@ public abstract class PostMapper {
 	@Mapping(source = "postRequest.description", target = "description")
 	@Mapping(source = "subreddit", target = "subreddit")
 	@Mapping(target = "voteCount", constant = "0")
+	@Mapping(source = "user", target = "user")
 	public abstract Post map(PostRequest postRequest, Subreddit subreddit, User user);
 
 	@Mapping(source = "postId", target = "id")

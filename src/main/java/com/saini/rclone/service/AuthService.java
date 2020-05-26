@@ -58,7 +58,7 @@ public class AuthService {
 			mailService
 					.sendMail(
 							NotificationEmail.builder().subject("Please activate your account")
-									.recipient(user.getEmail() +"Thank you for signing up to Our Application")
+									.recipient(user.getEmail() + "Thank you for signing up to Our Application")
 									.body("please click on the below url to activate your account : "
 											+ "http://localhost:9091/api/auth/accountVerification/" + activationToken)
 									.build());
@@ -69,13 +69,13 @@ public class AuthService {
 	}
 
 	@Transactional
-    public User getCurrentUser() {
-        org.springframework.security.core.userdetails.User principal = (org.springframework.security.core.userdetails.User) SecurityContextHolder.
-                getContext().getAuthentication().getPrincipal();
-        return userRepository.findByUsername(principal.getUsername())
-                .orElseThrow(() -> new UsernameNotFoundException("User name not found - " + principal.getUsername()));
-    }
-	
+	public User getCurrentUser() {
+		org.springframework.security.core.userdetails.User principal = (org.springframework.security.core.userdetails.User) SecurityContextHolder
+				.getContext().getAuthentication().getPrincipal();
+		return userRepository.findByUsername(principal.getUsername())
+				.orElseThrow(() -> new UsernameNotFoundException("User name not found - " + principal.getUsername()));
+	}
+
 	@Transactional
 	private void fetchUserAndEnable(VerificationToken verificationToken) {
 		String userName = verificationToken.getUser().getUsername();
@@ -87,7 +87,7 @@ public class AuthService {
 		user.setEnabled(true);
 		userRepository.save(user);
 	}
-	
+
 	@Transactional
 	private String generateVerificationToken(User user) {
 		String token = UUID.randomUUID().toString();
@@ -98,45 +98,33 @@ public class AuthService {
 
 		return token;
 	}
-	
+
 	public void verifyAccount(String token) {
 		Optional<VerificationToken> verificationToken = verificationTokenRepository.findByToken(token);
 		verificationToken.orElseThrow(() -> new SpringRedditException("Invalid Token"));
 
 		fetchUserAndEnable(verificationToken.get());
 	}
-	
+
 	public AuthenticationResponse login(LoginRequest loginRequest) {
-		Authentication authentication =	 authenticationManager.authenticate(
+		Authentication authentication = authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 		SecurityContextHolder.getContext().setAuthentication(authentication);
-		String token =jwtProvider.generateToken(authentication);
-		return AuthenticationResponse.builder()
-				.authenticationToken(token)
+		String token = jwtProvider.generateToken(authentication);
+		return AuthenticationResponse.builder().authenticationToken(token)
 				.refreshToken(refreshTokenService.generateRefreshToken().getToken())
 				.expiresAt(Instant.now().plusMillis(jwtProvider.getJwtExpirationInMillis()))
-				.username(loginRequest.getUsername())
-				.build();
+				.username(loginRequest.getUsername()).build();
 	}
-	
+
 	public AuthenticationResponse refreshToken(RefreshTokenRequest refreshTokenRequest) {
-        refreshTokenService.validateRefreshToken(refreshTokenRequest.getRefreshToken());
-        String token = jwtProvider.generateTokenWithUserName(refreshTokenRequest.getUsername());
-        return AuthenticationResponse.builder()
-                .authenticationToken(token)
-                .refreshToken(refreshTokenRequest.getRefreshToken())
-                .expiresAt(Instant.now().plusMillis(jwtProvider.getJwtExpirationInMillis()))
-                .username(refreshTokenRequest.getUsername())
-                .build();
-    }
-
-	
-	
-	
-
-	
-
-	
+		refreshTokenService.validateRefreshToken(refreshTokenRequest.getRefreshToken());
+		String token = jwtProvider.generateTokenWithUserName(refreshTokenRequest.getUsername());
+		return AuthenticationResponse.builder().authenticationToken(token)
+				.refreshToken(refreshTokenRequest.getRefreshToken())
+				.expiresAt(Instant.now().plusMillis(jwtProvider.getJwtExpirationInMillis()))
+				.username(refreshTokenRequest.getUsername()).build();
+	}
 
 	private boolean isUserExists(RegisterRequest registerRequest) {
 

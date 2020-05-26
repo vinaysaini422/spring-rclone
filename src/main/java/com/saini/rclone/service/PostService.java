@@ -1,17 +1,18 @@
 package com.saini.rclone.service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.saini.rclone.dto.PostRequest;
 import com.saini.rclone.dto.PostResponse;
 import com.saini.rclone.exceptions.PostNotFoundException;
 import com.saini.rclone.exceptions.SubredditNotFoundException;
+import com.saini.rclone.exceptions.UsernameNotFoundexception;
 import com.saini.rclone.mapper.PostMapper;
 import com.saini.rclone.model.Post;
 import com.saini.rclone.model.Subreddit;
@@ -21,6 +22,7 @@ import com.saini.rclone.repositories.SubredditRepository;
 import com.saini.rclone.repositories.UserRepository;
 
 import lombok.AllArgsConstructor;
+
 
 @Service
 @AllArgsConstructor
@@ -36,7 +38,8 @@ public class PostService {
     public void save(PostRequest postRequest) {
         Subreddit subreddit = subredditRepository.findByName(postRequest.getSubredditName())
                 .orElseThrow(() -> new SubredditNotFoundException(postRequest.getSubredditName()));
-        postRepository.save(postMapper.map(postRequest, subreddit, authService.getCurrentUser()));
+        Post post =postMapper.map(postRequest, subreddit, authService.getCurrentUser());
+        postRepository.save(post);
     }
 
     @Transactional
@@ -57,15 +60,21 @@ public class PostService {
     @Transactional
     public List<PostResponse> getPostsBySubreddit(Long subredditId) {
         Subreddit subreddit = subredditRepository.findById(subredditId)
-                .orElseThrow(() -> new SubredditNotFoundException(subredditId.toString()));
+                .orElseThrow(() -> new PostNotFoundException(subredditId.toString()));
         List<Post> posts = postRepository.findAllBySubreddit(subreddit);
         return posts.stream().map(postMapper::mapToDto).collect(Collectors.toList());	
     }
 
     @Transactional
     public List<PostResponse> getPostsByUsername(String username) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException(username));
+    	Optional<User> optional =userRepository.findByUsername(username);
+    	User user =null;
+    	if(optional.isPresent()) {
+    		user = optional.get();
+    	}else {
+    		throw new UsernameNotFoundexception("Username not found");
+    	}
+        
         return postRepository.findByUser(user)
                 .stream()
                 .map(postMapper::mapToDto)

@@ -9,6 +9,7 @@ import org.mapstruct.Mapping;
 import com.saini.rclone.dto.SubredditDto;
 import com.saini.rclone.model.Post;
 import com.saini.rclone.model.Subreddit;
+import com.saini.rclone.model.User;
 
 @Mapper(componentModel = "spring")
 public interface SubredditMapper {
@@ -22,6 +23,6 @@ public interface SubredditMapper {
 
 	@InheritInverseConfiguration
 	@Mapping(target = "posts", ignore = true)
-	Subreddit mapDtoToSubreddit(SubredditDto subredditDto);
+	Subreddit mapDtoToSubreddit(SubredditDto subredditDto, User user);
 
 }

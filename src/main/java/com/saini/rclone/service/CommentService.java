@@ -9,7 +9,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.saini.rclone.dto.CommentsDto;
-import com.saini.rclone.exceptions.PostNotFoundException;
+import com.saini.rclone.exceptions.SubredditNotFoundException;
 import com.saini.rclone.mapper.CommentMapper;
 import com.saini.rclone.model.Comment;
 import com.saini.rclone.model.NotificationEmail;
@@ -37,7 +37,7 @@ public class CommentService {
     @Transactional
     public void save(CommentsDto commentsDto) {
         Post post = postRepository.findById(commentsDto.getPostId())
-                .orElseThrow(() -> new PostNotFoundException(commentsDto.getPostId().toString()));
+                .orElseThrow(() -> new SubredditNotFoundException(commentsDto.getPostId().toString()));
         Comment comment = commentMapper.map(commentsDto, post, authService.getCurrentUser());
         commentRepository.save(comment);
 
@@ -50,7 +50,7 @@ public class CommentService {
     }
     
     public List<CommentsDto> getAllCommentsForPost(Long postId) {
-        Post post = postRepository.findById(postId).orElseThrow(() -> new PostNotFoundException(postId.toString()));
+        Post post = postRepository.findById(postId).orElseThrow(() -> new SubredditNotFoundException(postId.toString()));
         return commentRepository.findByPost(post)
                 .stream()
                 .map(commentMapper::mapToDto).collect(Collectors.toList());
